@@ -46,3 +46,19 @@ test = pd.read_parquet(ROOT / "data/processed/test_cleaned.parquet")
 ```
 
 The ready-to-use exports do not require rerunning cleaning. To regenerate them in a new kernel, see [the cleaning reproduction guide](docs/data_cleaning.md). Only train contains `is_suspicious`; join downstream features on `TRANSACTION_HASH`. `delivered_usd` measures recipient-received value, not sender spending.
+
+## LightGBM + Person 4 behaviour experiment
+
+On `feature/machine-learning`, use Python 3.13.2 and install `requirements-ml.txt` in your virtual environment. From the repository root, run:
+
+```sh
+.venv/bin/python -m pip install -r requirements-ml.txt
+.venv/bin/python notebooks/run_behaviour_features.py
+.venv/bin/python notebooks/run_ml_baseline.py
+```
+
+The first notebook generates Thanmaya's six training behaviour features locally; the second runs LightGBM with the agreed parameters and stratified 80/20 seed-42 split. No official validation/test data are read. Generated feature/model files remain under ignored `outputs/` and are recreated by these commands.
+
+Open `notebooks/02_ml_baseline.ipynb` for context, configuration and saved measured results, or `outputs/02_ml_baseline.executed.ipynb` after a new run. To rerun the cleaning-only baseline, set both `FEATURE_FILES` entries to `None`; restore the behaviour path to compare the enriched run.
+
+Measured internal results: AP 0.341644 → 0.417188 with behaviour features. Enriched accuracy at threshold 0.5: training 97.74%, internal holdout 97.28%. Accuracy should be read alongside AP/recall because of class imbalance. See [comparison and provenance](docs/thanmaya_behaviour_comparison.md) and [feature handoff](docs/feature_handoff.md).
