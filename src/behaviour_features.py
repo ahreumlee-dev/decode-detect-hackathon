@@ -13,6 +13,8 @@ import pandas as pd
 FEATURES = [
     'sender_tx_count_1h', 'sender_tx_count_24h', 'seconds_since_previous_tx',
     'sender_unique_recipients_24h', 'sender_outflow_usd_24h', 'sender_inflow_usd_24h',
+    'sender_tx_count_next_1h', 'seconds_until_next_tx',
+    'sender_outflow_usd_next_24h', 'receiver_outflow_usd_next_1h',
 ]
 
 
@@ -61,10 +63,11 @@ def _validated(frame: pd.DataFrame, columns: Columns) -> pd.DataFrame:
     return data
 
 
-def _window_sum(times, amounts, query_times):
+def _window_sum(times, amounts, query_times, lo=-86400, hi=0,
+                lo_side='left', hi_side='left'):
     """Unknown amount in a nonempty window => NaN; empty window => zero."""
-    left = np.searchsorted(times, query_times - 86400, side='left')
-    right = np.searchsorted(times, query_times, side='left')
+    left = np.searchsorted(times, query_times + lo, side=lo_side)
+    right = np.searchsorted(times, query_times + hi, side=hi_side)
     known = ~np.isnan(amounts)
     # Missing values are excluded only from arithmetic; a separate count ensures
     # they always make the resulting window unknown, never a zero-valued payment.
@@ -93,6 +96,8 @@ def build_features(frame: pd.DataFrame, columns: Columns = Columns()) -> pd.Data
     output['seconds_since_previous_tx'] = np.nan
     ordered = data.sort_values('timestamp', kind='stable')
     incoming = {wallet: group for wallet, group in ordered.groupby('recipient', sort=False)}
+    outgoing = {wallet: group for wallet, group in ordered.groupby('sender', sort=False)}
+    output['seconds_until_next_tx'] = np.nan
     for wallet, group in ordered.groupby('sender', sort=False):
         indexes = group.index.to_numpy()
         times = group.timestamp.to_numpy()
@@ -122,10 +127,24 @@ def build_features(frame: pd.DataFrame, columns: Columns = Columns()) -> pd.Data
             unique[i] = len(counts)
         output.loc[indexes, FEATURES[3]] = unique
         output.loc[indexes, FEATURES[4]] = _window_sum(times, group.paid_usd.to_numpy(), times)
+        after = np.searchsorted(times, times, side='right')           # first payment strictly later
+        upper1h = np.searchsorted(times, times + 3600, side='right')  # first payment beyond +1h
+        output.loc[indexes, 'sender_tx_count_next_1h'] = upper1h - after
+
+        next_gap = np.full(len(times), np.nan)
+        has_next = after < len(times)
+        next_gap[has_next] = times[after[has_next]] - times[has_next]
+        output.loc[indexes, 'seconds_until_next_tx'] = next_gap
+
+        output.loc[indexes, 'sender_outflow_usd_next_24h'] = _window_sum(times, group.paid_usd.to_numpy(), times,lo=0, hi=86400, lo_side='right', hi_side='right')
         received = incoming.get(wallet)
         if received is not None:
             output.loc[indexes, FEATURES[5]] = _window_sum(
                 received.timestamp.to_numpy(), received.received_usd.to_numpy(), times)
+    for wallet, group in ordered.groupby('recipient', sort=False):
+        sent = outgoing.get(wallet)
+        if sent is not None:
+            output.loc[group.index.to_numpy(), 'receiver_outflow_usd_next_1h'] = _window_sum(sent.timestamp.to_numpy(), sent.paid_usd.to_numpy(), group.timestamp.to_numpy(),lo=0, hi=3600, lo_side='right', hi_side='right')
     return output
 
 
