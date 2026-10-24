@@ -5,8 +5,8 @@ __pycache__/
 .env
 *.pyc
 # Organiser datasets, derived data, submissions (not public by default)
-data/raw/
-data/processed/
+#data/raw/
+#data/processed/
 outputs/
 submission/*.zip
 # Model artefacts
