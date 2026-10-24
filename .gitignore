@@ -13,8 +13,3 @@ submission/*.zip
 *.pkl
 *.joblib
 *.pt
-
-# Local regenerated tables and notebook execution state
-data/processed/*
-!data/processed/.gitkeep
-.pytest_cache/

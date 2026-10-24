@@ -1,8 +1,0 @@
-{
-  "transaction_hash": "TRANSACTION_HASH",
-  "timestamp": "TIMESTAMP",
-  "sender": "FROM_ADDRESS",
-  "recipient": "TO_ADDRESS",
-  "paid_usd": "PAID_USD",
-  "received_usd": "RECEIVED_USD"
-}
