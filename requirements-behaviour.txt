@@ -1,0 +1,19 @@
+# Validated with Python 3.12.11. Behaviour contribution only.
+numpy==2.3.1
+pandas==2.3.1
+pyarrow==24.0.0
+pytest==8.4.1
+# Integrated starter notebook model
+scikit-learn==1.9.1
+scipy==1.18.1
+joblib==1.6.0
+threadpoolctl==3.7.0
+narwhals==2.27.1
+cloudpickle==3.1.2
+
+# Required to run notebook cells in VS Code
+ipykernel==7.4.0
+
+# Execute source notebooks in a fresh kernel
+nbformat==5.11.1
+nbclient==0.11.0
