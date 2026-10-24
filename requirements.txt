@@ -1,0 +1,2 @@
+# Add and pin exact versions used on hackathon day.
+# e.g. pandas, pyarrow, scikit-learn, lightgbm, networkx, jupyter

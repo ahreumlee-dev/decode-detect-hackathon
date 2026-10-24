@@ -1,0 +1,15 @@
+# Runtime and secrets
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+.env
+*.pyc
+# Organiser datasets, derived data, submissions (not public by default)
+data/raw/
+data/processed/
+outputs/
+submission/*.zip
+# Model artefacts
+*.pkl
+*.joblib
+*.pt
