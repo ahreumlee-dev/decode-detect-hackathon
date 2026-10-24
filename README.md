@@ -1,15 +1,31 @@
-# XRPL AML Hackathon — team workspace
+# BathBytes XRPL AML - organised source snapshot
 
-Collaboration scaffold only. Build judged models and features during the event.
+This archive reorganises the provided **39-point submission ZIP**; it does not claim to reproduce 39 AP without datasets nor improve it.
 
-## Teams / outputs
-- 01 preprocessing: transaction-level cleaned train/test
-- 02 graph analysis: transaction-level graph features
-- 03 ML: baseline, Random Forest / LightGBM, average precision
-- 04 behaviour: transaction-level temporal features
-- 05 integration: merge on `TRANSACTION_HASH`, validate and submit
+## Folders
+- `src/`: source modules (`payments.py`, behaviour processing and generation).
+- `notebooks/01_data_cleaning.ipynb`: cleaned transaction table generation.
+- `notebooks/02_graph_experimental.ipynb`: graph research, NOT yet wired into final model.
+- `notebooks/04_behaviour_features.ipynb`: generate six historical behaviour features.
+- `notebooks/03_lightgbm_behaviour.ipynb`: recommended LightGBM experiment and predictions (12 baseline vs 18 with behaviour).
+- `notebooks/run_data_cleaning.py`: runs cleaning and behaviour notebooks in fresh kernels.
+- `docs/`: team notes; some originated from a separate logistic integration and may describe different scores.
+- `archive/`: older, competing notebooks for reference only.
 
-All feature tables must have exactly one row per `TRANSACTION_HASH`. Never merge labels into test data. Share processed data only as permitted by the organiser.
+## From project root
+1. Install: `python -m pip install -r requirements.txt`.
+2. Place organiser source data in `data/raw/train/`, `data/raw/test/`, and `data/raw/validation/` as required. **Not included in ZIP.**
+3. Run cleaning: `python notebooks/run_data_cleaning.py`.
+4. Generate behaviour: `python -m src.generate_behaviour` (or run `notebooks/04_behaviour_features.ipynb`).
+5. Run all cells in `notebooks/03_lightgbm_behaviour.ipynb` (from root or notebooks folder).
+6. Submission file: `outputs/predictions_behaviour_fixed.csv`. Upload that CSV separately from the source-code ZIP.
 
-## Instructions to fill in on event day
-Document dataset paths, package versions, exact run commands, random seeds, model selection and score here.
+## Validation and caveats
+- Model trains on 18 features and tests on the same ordered 18 columns, matching by `TRANSACTION_HASH`.
+- Assert that train rows = 40,131 and test rows = 40,101; test CSV has exactly `TRANSACTION_HASH,score`.
+- The LightGBM notebook has **not** been run on raw data in this packaging environment.
+- Original submission's `src/predictions.csv` is intentionally excluded as a generated artifact to prevent accidental stale uploads.
+- Older notebooks had conflicting model/submission flows; do not run `archive/` for submission.
+- The experimental graph notebook is not integrated with the LightGBM notebook.
+- Check actual environment/library versions and choose a project LICENSE before final source submission (none was provided).
+- Current cleaning notebook may rely on a validation/ split even though model scoring only needs train/test.

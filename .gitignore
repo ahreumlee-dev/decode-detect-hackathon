@@ -13,3 +13,14 @@ submission/*.zip
 *.pkl
 *.joblib
 *.pt
+
+bathbytes_organized_project/
+# Generated files
+*.DS_Store
+outputs/
+*.zip
+src/predictions.csv
+
+# Datasets (keep local only)
+data/raw/
+data/processed/
